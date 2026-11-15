@@ -9,7 +9,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev wget xz-utils git gcc-multilib
+          sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev wget xz-utils git gcc-multilib g++-multilib libncurses5-dev
       - name: Download Kernel 4.14.15
         run: |
           wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.15.tar.xz
@@ -21,8 +21,8 @@ jobs:
         run: |
           cd linux-4.14.15
           sed -i 's/EXTRAVERSION =.*/EXTRAVERSION = -primeos-x86/' Makefile
-          make ARCH=i386 defconfig HOSTCFLAGS="-Wno-error" HOST_EXTRACFLAGS="-Wno-error"
-          make ARCH=i386 modules_prepare HOSTCFLAGS="-Wno-error" HOST_EXTRACFLAGS="-Wno-error"
+          make ARCH=i386 defconfig HOSTCFLAGS="-Wno-error -fcommon" HOST_EXTRACFLAGS="-Wno-error -fcommon"
+          make ARCH=i386 modules_prepare HOSTCFLAGS="-Wno-error -fcommon" HOST_EXTRACFLAGS="-Wno-error -fcommon"
       - name: Compile Driver
         run: |
           cd rtl8188fu
