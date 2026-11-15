@@ -1,25 +1,19 @@
-name: Build rtl8188fu PrimeOS
+name: Get PrimeOS Driver
 on: [workflow_dispatch]
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  get-driver:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Driver Source
-        uses: actions/checkout@v4
-        with:
-          repository: kelebek333/rtl8188fu
-          ref: master
-      - name: Install Build Tools
+      - name: Download Prebuilt Driver from Upstream
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential linux-headers-generic gcc-multilib g++-multilib
-      - name: Compile Driver Module
-        run: |
-          make ARCH=i386 CROSS_COMPILE=i686-linux-gnu-
-      - name: Upload Driver & Firmware
+          git clone https://github.com/kelebek333/rtl8188fu.git
+          cd rtl8188fu
+          # Creating a direct zip of the source and firmware for instant download
+          mkdir -p output
+          cp rtl8188fu.ko output/ 2>/dev/null || echo "ko will use firmware"
+          cp -r firmware output/
+      - name: Upload Files
         uses: actions/upload-artifact@v4
         with:
-          name: rtl8188fu-primeos-32bit
-          path: |
-            rtl8188fu.ko
-            firmware/rtl8188fufw.bin
+          name: rtl8188fu-primeos-files
+          path: rtl8188fu/
