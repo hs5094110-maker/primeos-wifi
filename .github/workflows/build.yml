@@ -1,36 +1,25 @@
-name: Build rtl8188fu for PrimeOS 4.14.15
+name: Build rtl8188fu PrimeOS
 on: [workflow_dispatch]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout Code
+      - name: Checkout Driver Source
         uses: actions/checkout@v4
-      - name: Install Dependencies
+        with:
+          repository: kelebek333/rtl8188fu
+          ref: master
+      - name: Install Build Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev wget xz-utils git gcc-multilib g++-multilib libncurses5-dev
-      - name: Download Kernel 4.14.15
+          sudo apt-get install -y build-essential linux-headers-generic gcc-multilib g++-multilib
+      - name: Compile Driver Module
         run: |
-          wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.15.tar.xz
-          tar -xf linux-4.14.15.tar.xz
-      - name: Clone Driver Source
-        run: |
-          git clone https://github.com/kelebek333/rtl8188fu.git
-      - name: Prepare Kernel
-        run: |
-          cd linux-4.14.15
-          sed -i 's/EXTRAVERSION =.*/EXTRAVERSION = -primeos-x86/' Makefile
-          make ARCH=i386 defconfig HOSTCFLAGS="-Wno-error -fcommon" HOST_EXTRACFLAGS="-Wno-error -fcommon"
-          make ARCH=i386 modules_prepare HOSTCFLAGS="-Wno-error -fcommon" HOST_EXTRACFLAGS="-Wno-error -fcommon"
-      - name: Compile Driver
-        run: |
-          cd rtl8188fu
-          make ARCH=i386 KSRC=../linux-4.14.15
-      - name: Upload Artifacts
+          make ARCH=i386 CROSS_COMPILE=i686-linux-gnu-
+      - name: Upload Driver & Firmware
         uses: actions/upload-artifact@v4
         with:
           name: rtl8188fu-primeos-32bit
           path: |
-            rtl8188fu/rtl8188fu.ko
-            rtl8188fu/firmware/rtl8188fufw.bin
+            rtl8188fu.ko
+            firmware/rtl8188fufw.bin
